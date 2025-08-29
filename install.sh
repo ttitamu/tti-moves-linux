@@ -15,30 +15,30 @@ echo "==========================================="
 echo
 
 # Check if running on Debian system
-if ! command -v apt-get &> /dev/null; then
-    echo "Error: This installer is designed for Debian systems only."
-    echo "Please ensure you are running on a Debian-based distribution."
-    exit 1
+if ! command -v apt-get &>/dev/null; then
+  echo "Error: This installer is designed for Debian systems only."
+  echo "Please ensure you are running on a Debian-based distribution."
+  exit 1
 fi
 
 # Check if running as root
 if [[ $EUID -eq 0 ]]; then
-    echo "Error: Please do not run this script as root."
-    echo "The script will ask for sudo permissions when needed."
-    exit 1
+  echo "Error: Please do not run this script as root."
+  echo "The script will ask for sudo permissions when needed."
+  exit 1
 fi
 
 # Check if git is available
-if ! command -v git &> /dev/null; then
-    echo "Error: git is required but not installed."
-    echo "Installing git..."
-    sudo apt update && sudo apt install git -y
+if ! command -v git &>/dev/null; then
+  echo "Error: git is required but not installed."
+  echo "Installing git..."
+  sudo apt update && sudo apt install git -y
 fi
 
 # Remove existing directory if it exists
 if [ -d "$INSTALL_DIR" ]; then
-    echo "Removing existing EPA-MOVES-Linux directory..."
-    rm -rf "$INSTALL_DIR"
+  echo "Removing existing EPA-MOVES-Linux directory..."
+  rm -rf "$INSTALL_DIR"
 fi
 
 # Clone the repository
@@ -50,6 +50,9 @@ echo "Starting MOVES installation..."
 cd "$INSTALL_DIR"
 chmod +x scripts/moves_setup_linux.sh
 sudo bash scripts/moves_setup_linux.sh
+
+# Change ownership back to user
+sudo chown -R $USER:movesgroup /opt/moves
 
 echo
 echo "==========================================="
@@ -67,3 +70,4 @@ echo "4. Run command line: ./launch_moves_cli.sh /path/to/runspec.mrs"
 echo
 echo "For more information, visit: https://github.com/ttitamu/tti-moves-linux"
 echo
+
