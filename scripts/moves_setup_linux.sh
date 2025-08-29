@@ -311,6 +311,10 @@ sudo mv "$TEMP_MOVES_DIR/EPA_MOVES_Model" /opt/moves/
 # Set proper ownership and permissions
 sudo chown -R $USER:movesgroup /opt/moves/EPA_MOVES_Model
 sudo chmod -R 775 /opt/moves/EPA_MOVES_Model
+# Ensure both user and mysql can write to the directory
+sudo chmod g+s /opt/moves/EPA_MOVES_Model
+# Verify mysql is in movesgroup
+sudo usermod -aG movesgroup mysql
 
 echo "MOVES moved to /opt/moves/EPA_MOVES_Model"
 
@@ -476,6 +480,7 @@ find . -name "*.sh" -exec chmod +x {} \;
 # Set final permissions (already done, but ensuring consistency)
 sudo chown -R $USER:movesgroup /opt/moves/EPA_MOVES_Model
 sudo chmod -R 775 /opt/moves/EPA_MOVES_Model
+sudo chmod g+s /opt/moves/EPA_MOVES_Model
 
 # Clean up temporary installation directory
 echo "Cleaning up temporary files..."
