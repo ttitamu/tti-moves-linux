@@ -1,0 +1,96 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Get version
+      id: version
+      run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      
+    - name: Create release assets
+      run: |
+        # Create release directory
+        mkdir -p release_assets
+        
+        # Copy install script
+        cp install.sh release_assets/
+        
+        # Generate checksums
+        cd release_assets
+        sha256sum install.sh > checksums.sha256
+        cd ..
+        
+    - name: Create release notes
+      run: |
+        cat > release_notes.md << EOF
+        # TTI MOVES Linux ${{ steps.version.outputs.version }}
+        
+        ## Secure Installation (Recommended)
+        
+        \`\`\`bash
+        # Download files
+        curl -fsSL https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.version }}/install.sh -o install.sh
+        curl -fsSL https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.version }}/checksums.sha256 -o checksums.sha256
+        
+        # Verify integrity
+        sha256sum -c checksums.sha256
+        
+        # Run if verification passes
+        bash install.sh
+        \`\`\`
+        
+        ## Quick Installation (Less Secure)
+        
+        \`\`\`bash
+        curl -fsSL https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.version }}/install.sh | bash
+        \`\`\`
+        
+        ## System Requirements
+        - OS: Debian 11+ or Ubuntu 20.04+
+        - Memory: 8GB+ recommended
+        - Storage: 20GB+ free space
+        EOF
+        
+    - name: Create release
+      uses: actions/create-release@v1
+      id: create_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.version.outputs.version }}
+        release_name: ${{ steps.version.outputs.version }}
+        body_path: release_notes.md
+        draft: false
+        prerelease: false
+        
+    - name: Upload install script
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: release_assets/install.sh
+        asset_name: install.sh
+        asset_content_type: application/x-sh
+        
+    - name: Upload checksums
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: release_assets/checksums.sha256
+        asset_name: checksums.sha256
+        asset_content_type: text/plain
