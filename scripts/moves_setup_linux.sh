@@ -387,7 +387,7 @@ echo "Running MOVES with runspec: $RUNSPEC"
 echo "Log file: $LOG_FILE"
 
 # Extract output database name from MRS file
-OUTPUT_DB=$(grep -i "outputdatabasename" "$RUNSPEC" | head -1 | sed 's/.*<outputdatabasename>\([^<]*\)<\/outputdatabasename>.*/\1/' | tr '[:upper:]' '[:lower:]')
+OUTPUT_DB=$(grep -i "outputdatabase" "$RUNSPEC" | head -1 | sed 's/.*databasename="\([^"]*\)".*/\1/' | tr '[:upper:]' '[:lower:]')
 
 if [ -z "$OUTPUT_DB" ]; then
     echo "Warning: Could not find output database name in MRS file"
