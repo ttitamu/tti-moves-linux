@@ -1,0 +1,20 @@
+[mysqld]
+default-storage-engine=MyISAM
+lower_case_table_names=1
+secure-file-priv=''
+sql_mode=STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+init-connect='SET NAMES utf8mb4'
+max_allowed_packet=2G
+key_buffer_size=2G
+query_cache_size=512M
+table_open_cache=4000
+myisam_sort_buffer_size=256M
+bulk_insert_buffer_size=256M
+tmp_table_size=1G
+max_heap_table_size=1G
+read_buffer_size=2M
+myisam_repair_threads=4
+concurrent_insert=2
+bind-address=0.0.0.0

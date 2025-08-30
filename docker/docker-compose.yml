@@ -1,0 +1,82 @@
+services:
+  moves:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: epa-moves-linux
+    hostname: moves-container
+    volumes:
+      # Mount data directory for runspecs and outputs
+      - ./data:/opt/moves/data
+      # Mount input databases directory
+      - ./input_databases:/opt/moves/input_databases:ro
+      # Persist MariaDB data
+      - moves_db_data:/var/lib/mysql
+      # Optional: Mount custom configuration
+      - ./config:/config:ro
+    environment:
+      # Set timezone
+      - TZ=America/Chicago
+      # MOVES specific environment variables
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - ANT_HOME=/usr/share/ant
+    # Allocate more resources for MOVES processing
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+          cpus: "4.0"
+        reservations:
+          memory: 4G
+          cpus: "2.0"
+    # Keep container running
+    stdin_open: true
+    tty: true
+    # Restart policy
+    restart: unless-stopped
+    # Health check
+    # healthcheck:
+    #   test: ["CMD", "mysqladmin", "ping", "-u", "moves", "-pmoves"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 60s
+
+  # Optional: Separate MariaDB service for advanced users
+  # Uncomment if you prefer to run MariaDB as a separate container
+  # mariadb:
+  #   image: mariadb:11.2
+  #   container_name: moves-mariadb
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: rootpassword
+  #     MYSQL_DATABASE: movesdb20241112
+  #     MYSQL_USER: moves
+  #     MYSQL_PASSWORD: moves
+  #   volumes:
+  #     - moves_external_db_data:/var/lib/mysql
+  #     - ./mariadb-moves.cnf:/etc/mysql/mariadb.conf.d/50-server.cnf:ro
+  #   ports:
+  #     - "3307:3306"
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 4G
+  #         cpus: '2.0'
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+
+volumes:
+  moves_db_data:
+    driver: local
+  # moves_external_db_data:
+  #   driver: local
+
+# Optional: Custom network for multi-container setup
+networks:
+  default:
+    driver: bridge
+
